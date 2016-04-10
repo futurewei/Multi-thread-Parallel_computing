@@ -56,7 +56,8 @@ void calcDepthNaive(float *depth, float *left, float *right, int imageWidth, int
 					{
 						for (int boxX = -featureWidth; boxX <= featureWidth; boxX++)
 						{
-							int leftX = x + boxX;
+							//!!!left x,y and right x,y different!
+							int leftX = x + boxX;  //=width in image+ feature width value
 							int leftY = y + boxY;
 							int rightX = x + dx + boxX;
 							int rightY = y + dy + boxY;
