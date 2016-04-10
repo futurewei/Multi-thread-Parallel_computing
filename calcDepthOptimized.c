@@ -101,8 +101,8 @@ void calcDepthOptimized(float *depth, float *left, float *right, int imageWidth,
 						}
 						else{
 							float differ_1 = left[ leftY*imageWidth + x+ featureWidth] - right[ rightY *imageWidth+ x+dx+featureWidth];
-							float differ_2 = left[ leftY* imageWidth + x+featureWidth-1] - right[ rightY *imagewidth+x+dx+featureWidth-1];
-							float differ_3 = left[ leftY * imageWidth + x+featureWidth-2] - right[rightY *imagewidth+x+dx+featureWidth-2];
+							float differ_2 = left[ leftY* imageWidth + x+featureWidth-1] - right[ rightY *imageWidth+x+dx+featureWidth-1];
+							float differ_3 = left[ leftY * imageWidth + x+featureWidth-2] - right[rightY *imageWidth+x+dx+featureWidth-2];
 							squaredDifference += differ_1 * differ_1  + differ_2 * differ_2 +differ_3 * differ_3 ;
 						}
 					}
