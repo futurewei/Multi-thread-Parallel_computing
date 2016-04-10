@@ -53,13 +53,13 @@ void calcDepthOptimized(float *depth, float *left, float *right, int imageWidth,
 			{
 				startingY=featureHeight-y;
 			}
-			if(x-maximumDisplacement-featurewidth<0)
+			if(x-maximumDisplacement-featureWidth<0)
 			{
-				startingx=featureHeight-x;
+				startingX=featureHeight-x;
 			}
 			if(y + maximumDisplacement + featureHeight >= imageHeight)
 			{
-				endY=imageheight-featureHeight-y;
+				endY=imageHeight-featureHeight-y;
 			}
 			if(x + maximumDisplacement + featureWidth >= imageHeight)
 			{
@@ -85,13 +85,15 @@ void calcDepthOptimized(float *depth, float *left, float *right, int imageWidth,
 							int rightX = x + dx + boxX;
 							int rightY = y + dy + boxY;
 
-							_m128 left_row=_mm_loadu_ps(&left[leftY * imageWidth + leftX]);
-							_m128 right_row=_mm_loadu_ps(&right[rightY * imageWidth + rightX]);
-							_m128 difference = _mm_sub_ps(left_row, right_row);
-							_m128 sqrtdiff=_mm_mul_ps(difference, difference);
+							__m128 left_row=_mm_loadu_ps(&left[leftY * imageWidth + leftX]);
+							__m128 right_row=_mm_loadu_ps(&right[rightY * imageWidth + rightX]);
+							__m128 difference = _mm_sub_ps(left_row, right_row);
+							__m128 sqrtdiff=_mm_mul_ps(difference, difference);
 						    squaredDifference+=sqrtdiff[0]+sqrtdiff[1]+sqrtdiff[2]+sqrtdiff[3];
 						}
 
+						int leftY = y + boxY;
+						int rightY = y + dy + boxY;
 						if( (2*featureWidth+1) % 4==1)
 						{
 							float differ = left[ leftY* imageWidth + x+featureWidth] - right[ rightY* imageWidth + x+dx+featureWidth];
@@ -101,7 +103,7 @@ void calcDepthOptimized(float *depth, float *left, float *right, int imageWidth,
 							float differ_1 = left[ leftY*imageWidth + x+ featureWidth] - right[ rightY *imagewidth+ x+dx+featureWidth];
 							float differ_2 = left[ leftY* imageWidth + x+featureWidth-1] - right[ rightY *imagewidth+x+dx+featureWidth-1];
 							float differ_3 = left[ leftY * imageWidth + x+featureWidth-2] - right[rightY *imagewidth+x+dx+featureWidth-2];
-							squaredDifference += diff_1 * diff_1  + diff_2 * diff_2 +diff_3 * diff_3 ;
+							squaredDifference += differ_1 * differ_1  + differ_2 * differ_2 +differ_3 * differ_3 ;
 						}
 					}
 
