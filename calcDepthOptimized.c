@@ -65,7 +65,7 @@ void calcDepthOptimized(float *depth, float *left, float *right, int imageWidth,
 			{
 				endX=imageWidth-featureWidth-x-1;
 			}
-
+			#pragma omp parallel for 
 			for (int dy = startingY; dy <= endY; dy++)
 			{	
 				for (int dx = startingX; dx <= endX; dx++)
