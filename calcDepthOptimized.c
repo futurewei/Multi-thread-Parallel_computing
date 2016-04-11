@@ -58,12 +58,11 @@ void calcDepthOptimized(float *depth, float *left, float *right, int imageWidth,
 
 					float squaredDifference = 0;
 					
-					
+					float squaredDiffer[4]={0,0,0,0};
+					__m128 total = _mm_setzero_ps();
 					/* Sum the squared difference within a box of +/- featureHeight and +/- featureWidth. */
 					for (int boxY = -featureHeight; boxY <= featureHeight; boxY++)
 					{
-						float squaredDiffer[4]={0,0,0,0};
-						__m128 total = _mm_setzero_ps();
 						for (int boxX = -featureWidth, i=1; i <= (2*featureWidth+1)-4; boxX+=4, i+=4)    //*************************************************
 						{
 							
@@ -79,6 +78,7 @@ void calcDepthOptimized(float *depth, float *left, float *right, int imageWidth,
 							total=_mm_add_ps(total, sqrtdiff);
 						
 						}
+					}
 
 						_mm_storeu_ps(squaredDiffer, total);
 						squaredDifference+=squaredDiffer[0]+squaredDiffer[1]+squaredDiffer[2]+squaredDiffer[3];
@@ -88,23 +88,34 @@ void calcDepthOptimized(float *depth, float *left, float *right, int imageWidth,
 							continue;
 						}
 
-
-						int leftY = y + boxY;
-						int rightY = y + dy + boxY;
+						int leftY;
+						int rightY;
 						if(featureWidth%2==0)
 						{
-							float differ = left[ leftY* imageWidth + x+featureWidth] - right[ rightY* imageWidth + x+dx+featureWidth];
-							squaredDifference += differ * differ;
+							#pragma omp parallel for reduction(+: squaredDifference)
+							for(int k=-featureHeight; k<=featureHeight; k++)
+							{
+								leftY=y+k;
+								rightY=y+dy+k;
+								float differ = left[ leftY* imageWidth + x+featureWidth] - right[ rightY* imageWidth + x+dx+featureWidth];
+								squaredDifference += differ * differ;
+							}
 						}
 						else{
+
+							#pragma omp parallel for reduction(+: squaredDifference)
+							for(int k=-featureHeight; k<=featureHeight; k++)
+						{
+							leftY=y+k;
+							rightY=y+k;
 							int leftpos=leftY*imageWidth + x+ featureWidth;
 							int rightpos=rightY *imageWidth+ x+dx+featureWidth;
 							float differ_1 = left[leftpos] - right[rightpos];
 							float differ_2 = left[leftpos-1] - right[ rightpos-1];
 							float differ_3 = left[leftpos-2] - right[rightpos-2];
-							squaredDifference += differ_1 * differ_1  + differ_2 * differ_2 +differ_3 * differ_3 ;
+							squaredDifference += differ_1 * differ_1  + differ_2 * differ_2 +differ_3 * differ_3;
 						}
-					}
+						}
 
 					/* 
 					Check if you need to update minimum square difference. 
@@ -144,3 +155,4 @@ void calcDepthOptimized(float *depth, float *left, float *right, int imageWidth,
   		}
 	}
 }
+
