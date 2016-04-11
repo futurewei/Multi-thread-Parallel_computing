@@ -90,10 +90,11 @@ void calcDepthOptimized(float *depth, float *left, float *right, int imageWidth,
 
 						int leftY;
 						int rightY;
+						int k;
 						if(featureWidth%2==0)
 						{
 							
-							for(int k=-featureHeight; k<=featureHeight; k++)
+							for(k=-featureHeight; k<=featureHeight; k++)
 							{
 								leftY=y+k;
 								rightY=y+dy+k;
@@ -102,9 +103,7 @@ void calcDepthOptimized(float *depth, float *left, float *right, int imageWidth,
 							}
 						}
 						else{
-
-							
-							for(int k=-featureHeight; k<=featureHeight; k++)
+							for(k=-featureHeight; k<=featureHeight; k++)
 						{
 							leftY=y+k;
 							rightY=y+k;
