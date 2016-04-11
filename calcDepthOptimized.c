@@ -67,14 +67,18 @@ void calcDepthOptimized(float *depth, float *left, float *right, int imageWidth,
 							int leftY = y + boxY;
 							int rightX = x + dx + boxX;
 							int rightY = y + dy + boxY;
-							#pragma omp parallel 
-							{
+
 							__m128 difference = _mm_sub_ps( _mm_loadu_ps(&left[leftY * imageWidth + leftX]), _mm_loadu_ps(&right[rightY * imageWidth + rightX]));
 							__m128 sqrtdiff=_mm_mul_ps(difference, difference);
 							float squaredDiffer[4]={0,0,0,0};
 							_mm_storeu_ps(squaredDiffer, sqrtdiff);
 						    squaredDifference+=squaredDiffer[0]+squaredDiffer[1]+squaredDiffer[2]+squaredDiffer[3];
+						
 						}
+
+						if (squaredDifference>minimumSquaredDifference && minimumSquaredDifference != -1) 
+						{
+							continue;
 						}
 
 						int leftY = y + boxY;
