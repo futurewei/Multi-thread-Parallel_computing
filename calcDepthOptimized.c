@@ -60,11 +60,9 @@ void calcDepthOptimized(float *depth, float *left, float *right, int imageWidth,
 					/* Sum the squared difference within a box of +/- featureHeight and +/- featureWidth. */
 					for (int boxY = -featureHeight; boxY <= featureHeight; boxY++)
 					{
-						int boxX = -featureWidth;
-						for (int i=1; i <= (2*featureWidth+1)-4; i+=4)    //*************************************************
+						for (int boxX = -featureWidth, i=1; i <= (2*featureWidth+1)-4; boxX+=4, i+=4)    //*************************************************
 						{
-
-							boxX+=4;
+							
 							int leftX = x + boxX; 
 							int leftY = y + boxY;
 							int rightX = x + dx + boxX;
