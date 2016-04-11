@@ -79,7 +79,7 @@ void calcDepthOptimized(float *depth, float *left, float *right, int imageWidth,
 
 						int leftY = y + boxY;
 						int rightY = y + dy + boxY;
-						if( (featureWidth%2==0)
+						if(featureWidth%2==0)
 						{
 							float differ = left[ leftY* imageWidth + x+featureWidth] - right[ rightY* imageWidth + x+dx+featureWidth];
 							squaredDifference += differ * differ;
