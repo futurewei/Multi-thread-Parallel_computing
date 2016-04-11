@@ -45,15 +45,31 @@ void calcDepthOptimized(float *depth, float *left, float *right, int imageWidth,
 			/* Iterate through all feature boxes that fit inside the maximum displacement box. 
 			   centered around the current pixel. */
 			/****************/
-			for (int dy = -maximumDisplacement; dy <= maximumDisplacement; dy++)
+			int startingY=-maximumDisplacement; 
+			int startingX=-maximumDisplacement;
+			int endY=maximumDisplacement;
+			int endX=maximumDisplacement;
+			if(y-maximumDisplacement-featureHeight<0)
 			{
-				for (int dx = -maximumDisplacement; dx <= maximumDisplacement; dx++)
+				startingY=featureHeight-y;
+			}
+			if(x-maximumDisplacement-featureWidth<0)
+			{
+				startingX=featureWidth-x;
+			}
+			if(y + maximumDisplacement + featureHeight >= imageHeight)
+			{
+				endY=imageHeight-featureHeight-y-1;
+			}
+			if(x + maximumDisplacement + featureWidth >= imageHeight)
+			{
+				endX=imageWidth-featureWidth-x-1;
+			}
+
+			for (int dy = startingY; dy <= endY; dy++)
+			{	
+				for (int dx = startingX; dx <= endX; dx++)
 				{
-					/* Skip feature boxes that dont fit in the displacement box. */
-					if (y + dy - featureHeight < 0 || y + dy + featureHeight >= imageHeight || x + dx - featureWidth < 0 || x + dx + featureWidth >= imageWidth)
-					{
-						continue;
-					}
 
 					float squaredDifference = 0;
 
@@ -79,8 +95,6 @@ void calcDepthOptimized(float *depth, float *left, float *right, int imageWidth,
 
 							difference = left[leftY * imageWidth + leftX+3] - right[rightY * imageWidth + rightX+3];
 							squaredDifference += difference * difference;
-
-
 						
 						}
 						//without adding the extra, if already too large
