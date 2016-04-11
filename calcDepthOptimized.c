@@ -60,22 +60,21 @@ void calcDepthOptimized(float *depth, float *left, float *right, int imageWidth,
 					/* Sum the squared difference within a box of +/- featureHeight and +/- featureWidth. */
 					for (int boxY = -featureHeight; boxY <= featureHeight; boxY++)
 					{
-						for (int boxX = -featureWidth, i=1; i <= (2*featureWidth+1)-4; boxX+=4, i+=4)    //*************************************************
+						for (int boxX = -featureWidth, i=1; i <= (2*featureWidth+1)-4; boxX+=1, i+=1)    //*************************************************
 						{
 							
-							int leftX = x + boxX; 
+		
+							//!!!left x,y and right x,y different!
+							int leftX = x + boxX;  //=width in image+ feature width value
 							int leftY = y + boxY;
 							int rightX = x + dx + boxX;
 							int rightY = y + dy + boxY;
 
-							__m128 difference = _mm_sub_ps( _mm_loadu_ps(&left[leftY * imageWidth + leftX]), _mm_loadu_ps(&right[rightY * imageWidth + rightX]));
-							__m128 sqrtdiff=_mm_mul_ps(difference, difference);
-							float squaredDiffer[4]={0,0,0,0};
-							_mm_storeu_ps(squaredDiffer, sqrtdiff);
-						    squaredDifference+=squaredDiffer[0]+squaredDiffer[1]+squaredDiffer[2]+squaredDiffer[3];
+							float difference = left[leftY * imageWidth + leftX] - right[rightY * imageWidth + rightX];
+							squaredDifference += difference * difference;
 						
 						}
-
+						//without adding the extra, if already too large
 						if (squaredDifference>minimumSquaredDifference && minimumSquaredDifference != -1) 
 						{
 							continue;
