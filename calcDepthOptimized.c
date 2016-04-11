@@ -106,7 +106,7 @@ void calcDepthOptimized(float *depth, float *left, float *right, int imageWidth,
 							for(k=-featureHeight; k<=featureHeight; k++)
 						{
 							leftY=y+k;
-							rightY=y+k;
+							rightY=y+dy+k;
 							int leftpos=leftY*imageWidth + x+ featureWidth;
 							int rightpos=rightY *imageWidth+ x+dx+featureWidth;
 							float differ_1 = left[leftpos] - right[rightpos];
