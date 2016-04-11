@@ -23,7 +23,9 @@
 /* DO NOT CHANGE ANYTHING ABOVE THIS LINE. */
 
 void calcDepthOptimized(float *depth, float *left, float *right, int imageWidth, int imageHeight, int featureWidth, int featureHeight, int maximumDisplacement)
-{/* The two outer for loops iterate through each pixel */
+{
+	/* The two outer for loops iterate through each pixel */
+	//depth array size= imageheight * imagewidth
 	#pragma omp parallel for
 	for (int y = 0; y < imageHeight; y++)
 	{
@@ -42,6 +44,7 @@ void calcDepthOptimized(float *depth, float *left, float *right, int imageWidth,
 
 			/* Iterate through all feature boxes that fit inside the maximum displacement box. 
 			   centered around the current pixel. */
+			/****************/
 			for (int dy = -maximumDisplacement; dy <= maximumDisplacement; dy++)
 			{
 				for (int dx = -maximumDisplacement; dx <= maximumDisplacement; dx++)
@@ -57,16 +60,37 @@ void calcDepthOptimized(float *depth, float *left, float *right, int imageWidth,
 					/* Sum the squared difference within a box of +/- featureHeight and +/- featureWidth. */
 					for (int boxY = -featureHeight; boxY <= featureHeight; boxY++)
 					{
-						for (int boxX = -featureWidth; boxX <= featureWidth; boxX++)
+						for (int boxX = -featureWidth, i=1; i <= (2*featureWidth+1)-4; boxX+=4, i+=4)    //*************************************************
 						{
-							//!!!left x,y and right x,y different!
-							int leftX = x + boxX;  //=width in image+ feature width value
+							
+							int leftX = x + boxX; 
 							int leftY = y + boxY;
 							int rightX = x + dx + boxX;
 							int rightY = y + dy + boxY;
 
-							float difference = left[leftY * imageWidth + leftX] - right[rightY * imageWidth + rightX];
-							squaredDifference += difference * difference;
+							__m128 left_row=_mm_loadu_ps(&left[leftY * imageWidth + leftX]);
+							__m128 right_row=_mm_loadu_ps(&right[rightY * imageWidth + rightX]);
+							__m128 difference = _mm_sub_ps(left_row, right_row);
+							__m128 sqrtdiff=_mm_mul_ps(difference, difference);
+							float squaredDiffer[4]={0,0,0,0};
+							_mm_storeu_ps(squaredDiffer, sqrtdiff);
+						    squaredDifference+=squaredDiffer[0]+squaredDiffer[1]+squaredDiffer[2]+squaredDiffer[3];
+						}
+
+						int leftY = y + boxY;
+						int rightY = y + dy + boxY;
+						if( (featureWidth%2==0)
+						{
+							float differ = left[ leftY* imageWidth + x+featureWidth] - right[ rightY* imageWidth + x+dx+featureWidth];
+							squaredDifference += differ * differ;
+						}
+						else{
+							int leftpos=leftY*imageWidth + x+ featureWidth;
+							int rightpos=rightY *imageWidth+ x+dx+featureWidth;
+							float differ_1 = left[leftpos] - right[rightpos];
+							float differ_2 = left[leftpos-1] - right[ rightpos-1];
+							float differ_3 = left[leftpos-2] - right[rightpos-2];
+							squaredDifference += differ_1 * differ_1  + differ_2 * differ_2 +differ_3 * differ_3 ;
 						}
 					}
 
@@ -105,6 +129,6 @@ void calcDepthOptimized(float *depth, float *left, float *right, int imageWidth,
 			{
 				depth[y * imageWidth + x] = 0;
 			}
-		}
+  		}
 	}
 }
