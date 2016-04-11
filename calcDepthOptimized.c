@@ -78,7 +78,7 @@ void calcDepthOptimized(float *depth, float *left, float *right, int imageWidth,
 						}
 					}
 
-						squareDiffer=_mm_add_ps(squaredDiffer, total);   //add?
+						_mm_storeu_ps(squaredDiffer, total);
 						squaredDifference+=squaredDiffer[0]+squaredDiffer[1]+squaredDiffer[2]+squaredDiffer[3];
 						//without adding the extra, if already too large
 						if (squaredDifference>minimumSquaredDifference && minimumSquaredDifference != -1) 
