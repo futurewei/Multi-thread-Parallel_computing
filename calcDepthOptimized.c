@@ -45,38 +45,24 @@ void calcDepthOptimized(float *depth, float *left, float *right, int imageWidth,
 			/* Iterate through all feature boxes that fit inside the maximum displacement box. 
 			   centered around the current pixel. */
 			/****************/
-			int startingY=-maximumDisplacement; 
-			int startingX=-maximumDisplacement;
-			int endY=maximumDisplacement;
-			int endX=maximumDisplacement;
-			if(y-maximumDisplacement-featureHeight<0)
+
+			for (int dy = -maximumDisplacement; dy <= maximumDisplacement; dy++)
 			{
-				startingY=featureHeight-y;
-			}
-			if(x-maximumDisplacement-featureWidth<0)
-			{
-				startingX=featureWidth-x;
-			}
-			if(y + maximumDisplacement + featureHeight >= imageHeight)
-			{
-				endY=imageHeight-featureHeight-y-1;
-			}
-			if(x + maximumDisplacement + featureWidth >= imageHeight)
-			{
-				endX=imageWidth-featureWidth-x-1;
-			}
-			#pragma omp parallel for 
-			for (int dy = startingY; dy <= endY; dy++)
-			{	
-				for (int dx = startingX; dx <= endX; dx++)
+				for (int dx = -maximumDisplacement; dx <= maximumDisplacement; dx++)
 				{
+					/* Skip feature boxes that dont fit in the displacement box. */
+					if (y + dy - featureHeight < 0 || y + dy + featureHeight >= imageHeight || x + dx - featureWidth < 0 || x + dx + featureWidth >= imageWidth)
+					{
+						continue;
+					}
 
 					float squaredDifference = 0;
+					__m128 total = _mm_setzero_ps();
 
 					/* Sum the squared difference within a box of +/- featureHeight and +/- featureWidth. */
 					for (int boxY = -featureHeight; boxY <= featureHeight; boxY++)
 					{
-						for (int boxX = -featureWidth, i=1; i <= (2*featureWidth+1)-4; boxX+=4, i+=4)    //*************************************************
+						for (int boxX = -featureWidth, i=1; i <= (2*featureWidth+1)/4; boxX+=4, i+=1)    //*************************************************
 						{
 							
 							int leftX = x + boxX; 
@@ -84,24 +70,23 @@ void calcDepthOptimized(float *depth, float *left, float *right, int imageWidth,
 							int rightX = x + dx + boxX;
 							int rightY = y + dy + boxY;
 
-							float difference = left[leftY * imageWidth + leftX] - right[rightY * imageWidth + rightX];
-							squaredDifference += difference * difference;
-
-							difference = left[leftY * imageWidth + leftX+1] - right[rightY * imageWidth + rightX+1];
-							squaredDifference += difference * difference;
-
-							difference = left[leftY * imageWidth + leftX+2] - right[rightY * imageWidth + rightX+2];
-							squaredDifference += difference * difference;
-
-							difference = left[leftY * imageWidth + leftX+3] - right[rightY * imageWidth + rightX+3];
-							squaredDifference += difference * difference;
+							__m128 left_row=_mm_loadu_ps(&left[leftY * imageWidth + leftX]);
+							__m128 right_row=_mm_loadu_ps(&right[rightY * imageWidth + rightX]);
+							__m128 difference = _mm_sub_ps(left_row, right_row);
+							__m128 sqrtdiff=_mm_mul_ps(difference, difference);
+							_mm_add_ps(total, sqrtdiff);
 						
 						}
+						
+						float squaredDiffer[4]={0,0,0,0};
+						_mm_storeu_ps(squaredDiffer, total);
+						squaredDifference+=squaredDiffer[0]+squaredDiffer[1]+squaredDiffer[2]+squaredDiffer[3];
 						//without adding the extra, if already too large
 						if (squaredDifference>minimumSquaredDifference && minimumSquaredDifference != -1) 
 						{
 							continue;
 						}
+
 
 						int leftY = y + boxY;
 						int rightY = y + dy + boxY;
