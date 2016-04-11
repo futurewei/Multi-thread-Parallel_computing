@@ -92,7 +92,7 @@ void calcDepthOptimized(float *depth, float *left, float *right, int imageWidth,
 						int rightY;
 						if(featureWidth%2==0)
 						{
-							#pragma omp parallel for reduction(+: squaredDifference)
+							
 							for(int k=-featureHeight; k<=featureHeight; k++)
 							{
 								leftY=y+k;
@@ -103,7 +103,7 @@ void calcDepthOptimized(float *depth, float *left, float *right, int imageWidth,
 						}
 						else{
 
-							#pragma omp parallel for reduction(+: squaredDifference)
+							
 							for(int k=-featureHeight; k<=featureHeight; k++)
 						{
 							leftY=y+k;
