@@ -31,6 +31,7 @@ void calcDepthOptimized(float *depth, float *left, float *right, int imageWidth,
 	for (int w = 0; w < imageWidth*imageHeight/8*8; w+=8)
 	{	
 			_mm_storeu_ps(&depth[w], zero);
+			_mm_storeu_ps(&depth[w+4], zero);
 	}
 		//tail case:
 	for (b = imageWidth*imageHeight/8*8;  b<= imageWidth*imageHeight; b++)
