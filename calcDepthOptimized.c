@@ -26,13 +26,18 @@ void calcDepthOptimized(float *depth, float *left, float *right, int imageWidth,
 {
 	/* The two outer for loops iterate through each pixel */
 	//depth array size= imageheight * imagewidth
-	for (int h = 0; h < imageHeight; h++)
-	{
-		for (int w = 0; w < imageWidth; w++)
-		{	
-				depth[h * imageWidth + w] = 0;
 
+		for (int w = 0; w < imageWidth*imageHeight/4*4; w+=4)
+		{	
+				depth[w] = 0;
+				depth[w+1] = 0;
+				depth[w+2] = 0;
+				depth[w+3] = 0;
 		}
+	//tail case:
+	for (int b = imageWidth*imageHeight/4*4;  b<= imageWidth*imageHeight; b++)
+	{	
+			depth[b] = 0;
 	}
 
 	
