@@ -36,9 +36,9 @@ void calcDepthOptimized(float *depth, float *left, float *right, int imageWidth,
 	}
 	
 #pragma omp parallel for
-	for(int y=featureHeight; y<imageHeight-featureHeight;y++)
+	for(int y=featureHeight; y<=imageHeight-featureHeight-1;y++)
 		{
-			for(int x=featureWidth; x<imageWidth-featureWidth; x++)
+			for(int x=featureWidth; x<=imageWidth-featureWidth-1; x++)
 		   {
 
 			float minimumSquaredDifference = -1;
@@ -138,7 +138,6 @@ void calcDepthOptimized(float *depth, float *left, float *right, int imageWidth,
 			*/
 				if (maximumDisplacement != 0)
 				{
-
 					depth[y * imageWidth + x] = displacementNaive(minimumDx, minimumDy);
 				}
 		}
