@@ -26,6 +26,7 @@ void calcDepthOptimized(float *depth, float *left, float *right, int imageWidth,
 {
 	/* The two outer for loops iterate through each pixel */
 	//depth array size= imageheight * imagewidth
+	#pragma omp parallel for
 	for (int h = 0; h < imageHeight; h++)
 	{
 		for (int w = 0; w < imageWidth; w++)
