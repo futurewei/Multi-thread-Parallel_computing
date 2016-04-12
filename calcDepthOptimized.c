@@ -35,7 +35,7 @@ void calcDepthOptimized(float *depth, float *left, float *right, int imageWidth,
 		//tail case:
 	for (b = imageWidth*imageheight/4*4;  b<= imageWidth*imageheight; b++)
 	{	
-			depth[h * imageWidth + b] = 0;
+			depth[b] = 0;
 	}
 }
 	
