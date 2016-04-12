@@ -27,11 +27,16 @@ void calcDepthOptimized(float *depth, float *left, float *right, int imageWidth,
 	/* The two outer for loops iterate through each pixel */
 	//depth array size= imageheight * imagewidth
 	int b;
+	__m128 zero=_mm_storeu_ps();
 	for (int h = 0; h < imageHeight; h++)
 	{
 		for (int w = 0; w < imageWidth/4*4; w+=4)
 		{	
-				_mm_storeu_ps(&depth[h*imageWidth+w], _mm_setzero_ps());
+				_mm_storeu_ps(&depth[h*imageWidth+w], zero);
+				depth[h * imageWidth + w] = 0;	
+				depth[h * imageWidth + w+1] = 0;
+				depth[h * imageWidth + w+2] = 0;
+				depth[h * imageWidth + w+3] = 0;
 		}
 		//tail case:
 		for (b = imageWidth/4*4;  b<= imageWidth; b++)
