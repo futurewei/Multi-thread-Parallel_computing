@@ -28,18 +28,16 @@ void calcDepthOptimized(float *depth, float *left, float *right, int imageWidth,
 	//depth array size= imageheight * imagewidth
 	int b;
 	__m128 zero=_mm_setzero_ps();
-	for (int h = 0; h < imageHeight; h++)
-	{
-		for (int w = 0; w < imageWidth/4*4; w+=4)
-		{	
-				_mm_storeu_ps(&depth[h*imageWidth+w], zero);
-		}
-		//tail case:
-		for (b = imageWidth/4*4;  b<= imageWidth; b++)
-		{	
-				depth[h * imageWidth + b] = 0;
-		}
+	for (int w = 0; w < imageWidth*imageheight/4*4; w+=4)
+	{	
+			_mm_storeu_ps(&depth[w], zero);
 	}
+		//tail case:
+	for (b = imageWidth*imageheight/4*4;  b<= imageWidth*imageheight; b++)
+	{	
+			depth[h * imageWidth + b] = 0;
+	}
+}
 	
 #pragma omp parallel for
 	for(int y=featureHeight; y<=imageHeight-featureHeight-1;y++)
