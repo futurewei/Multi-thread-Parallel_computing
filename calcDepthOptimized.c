@@ -65,53 +65,62 @@ void calcDepthOptimized(float *depth, float *left, float *right, int imageWidth,
 					}
 
 					float squaredDifference = 0;
+					
 					float squaredDiffer[4]={0.0,0.0,0.0,0.0};
 					__m128 total = _mm_setzero_ps();
 					/* Sum the squared difference within a box of +/- featureHeight and +/- featureWidth. */
 					for (int boxY = -featureHeight; boxY <= featureHeight; boxY++)
 					{
-						int leftY = y + boxY;
-						int rightY = y + dy + boxY;
-						int leftpos=leftY*imageWidth + x+ featureWidth;
-						int rightpos=rightY *imageWidth+ x+dx+featureWidth;
-						int leftt=leftY * imageWidth;
-						int rightt=rightY * imageWidth;
 						for (int boxX = -featureWidth, i=1; i <= (2*featureWidth+1)-4; boxX+=4, i+=4)    //*************************************************
 						{
 							
 							int leftX = x + boxX; 
+							int leftY = y + boxY;
 							int rightX = x + dx + boxX;
-							
-							__m128 left_row=_mm_loadu_ps(&left[ leftt+ leftX]);
-							__m128 right_row=_mm_loadu_ps(&right[rightt + rightX]);
-							__m128 difference = _mm_sub_ps(left_row, right_row);
-							difference=_mm_mul_ps(difference, difference);
-							total=_mm_add_ps(total, difference);
-						}
+							int rightY = y + dy + boxY;
 
+							__m128 left_row=_mm_loadu_ps(&left[leftY * imageWidth + leftX]);
+							__m128 right_row=_mm_loadu_ps(&right[rightY * imageWidth + rightX]);
+							__m128 difference = _mm_sub_ps(left_row, right_row);
+							__m128 sqrtdiff=_mm_mul_ps(difference, difference);
+							total=_mm_add_ps(total, sqrtdiff);
+						}
+					}
+
+						_mm_storeu_ps(squaredDiffer, total);   //add
+						squaredDifference+=squaredDiffer[0]+squaredDiffer[1]+squaredDiffer[2]+squaredDiffer[3];
 						//without adding the extra, if already too large
 						if (squaredDifference>minimumSquaredDifference && minimumSquaredDifference != -1) 
 						{
 							continue;
 						}
 
+						int leftY;
+						int rightY;
+						int k;
 						if(featureWidth%2==0)
 						{
+							for(k=-featureHeight; k<=featureHeight; k++)
+							{
+								leftY=y+k;
+								rightY=y+dy+k;
 								float differ = left[ leftY* imageWidth + x+featureWidth] - right[ rightY* imageWidth + x+dx+featureWidth];
 								squaredDifference += differ * differ;
+							}
 						}
 						else{
-							//need to speed up this!
-							float differ1 = left[ leftpos] - right[ rightpos];
-							float differ2 = left[ leftpos-1] - right[ rightpos-1];
-							float differ3 = left[ leftpos-2] - right[ rightpos-2];
-							squaredDifference+=differ1*differ1+differ2*differ2+differ3*differ3;
+							for(k=-featureHeight; k<=featureHeight; k++)
+						{
+							leftY=y+k;
+							rightY=y+dy+k;
+							int leftpos=leftY*imageWidth + x+ featureWidth;
+							int rightpos=rightY *imageWidth+ x+dx+featureWidth;
+							float differ_1 = left[leftpos] - right[rightpos];
+							float differ_2 = left[leftpos-1] - right[ rightpos-1];
+							float differ_3 = left[leftpos-2] - right[rightpos-2];
+							squaredDifference += differ_1 * differ_1  + differ_2 * differ_2 +differ_3 * differ_3;
 						}
-					}
-
-						_mm_storeu_ps(squaredDiffer, total);   //add
-						squaredDifference+=squaredDiffer[0]+squaredDiffer[1]+squaredDiffer[2]+squaredDiffer[3];
-						
+						}
 
 					/* 
 					Check if you need to update minimum square difference. 
