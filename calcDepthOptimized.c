@@ -65,25 +65,26 @@ void calcDepthOptimized(float *depth, float *left, float *right, int imageWidth,
 					}
 
 					float squaredDifference = 0;
-					__m128 difference;
-					__m128 left_row;
-					__m128 right_row;
 					float squaredDiffer[4]={0.0,0.0,0.0,0.0};
 					__m128 total = _mm_setzero_ps();
 					/* Sum the squared difference within a box of +/- featureHeight and +/- featureWidth. */
 					for (int boxY = -featureHeight; boxY <= featureHeight; boxY++)
 					{
+						int leftY = y + boxY;
+						int rightY = y + dy + boxY;
+						int leftpos=leftY*imageWidth + x+ featureWidth;
+						int rightpos=rightY *imageWidth+ x+dx+featureWidth;
+						int leftt=leftY * imageWidth;
+						int rightt=rightY * imageWidth;
 						for (int boxX = -featureWidth, i=1; i <= (2*featureWidth+1)-4; boxX+=4, i+=4)    //*************************************************
 						{
 							
 							int leftX = x + boxX; 
-							int leftY = y + boxY;
 							int rightX = x + dx + boxX;
-							int rightY = y + dy + boxY;
-
-							left_row=_mm_loadu_ps(&left[leftY * imageWidth + leftX]);
-							right_row=_mm_loadu_ps(&right[rightY * imageWidth + rightX]);
-							difference = _mm_sub_ps(left_row, right_row);
+							
+							__m128 left_row=_mm_loadu_ps(&left[ leftt+ leftX]);
+							__m128 right_row=_mm_loadu_ps(&right[rightt + rightX]);
+							__m128 difference = _mm_sub_ps(left_row, right_row);
 							difference=_mm_mul_ps(difference, difference);
 							total=_mm_add_ps(total, difference);
 						}
@@ -94,28 +95,17 @@ void calcDepthOptimized(float *depth, float *left, float *right, int imageWidth,
 							continue;
 						}
 
-						int leftY;
-						int rightY;
 						if(featureWidth%2==0)
 						{
-								leftY=y+boxY;
-								rightY=y+dy+boxY;
 								float differ = left[ leftY* imageWidth + x+featureWidth] - right[ rightY* imageWidth + x+dx+featureWidth];
 								squaredDifference += differ * differ;
 						}
 						else{
 							//need to speed up this!
-							leftY=y+boxY;
-							rightY=y+dy+boxY;
-							int leftpos=leftY*imageWidth + x+ featureWidth;
-							int rightpos=rightY *imageWidth+ x+dx+featureWidth;
-							left[leftpos-3]=0;
-							right[rightpos-3]=0;
-							left_row=_mm_loadu_ps(&left[leftpos-3]);
-							right_row=_mm_loadu_ps(&right[rightpos-3]);
-							difference = _mm_sub_ps(left_row, right_row);
-							difference=_mm_mul_ps(difference, difference);
-							total=_mm_add_ps(total, difference);
+							float differ1 = left[ leftpos] - right[ rightpos];
+							float differ2 = left[ leftpos-1] - right[ rightpos-1];
+							float differ3 = left[ leftpos-2] - right[ rightpos-2];
+							squaredDifference+=differ1*differ1+differ2*differ2+differ3*differ3;
 						}
 					}
 
