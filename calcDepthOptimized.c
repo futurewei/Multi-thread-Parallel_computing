@@ -26,22 +26,22 @@ void calcDepthOptimized(float *depth, float *left, float *right, int imageWidth,
 {
 	/* The two outer for loops iterate through each pixel */
 	//depth array size= imageheight * imagewidth
-
-		for (int w = 0; w < imageWidth*imageHeight/4*4; w+=4)
-		{	
-				depth[w] = 0;
-				depth[w+1] = 0;
-				depth[w+2] = 0;
-				depth[w+3] = 0;
-		}
-	//tail case:
-	for (int b = imageWidth*imageHeight/4*4;  b<= imageWidth*imageHeight; b++)
+	// invalid write of size
+	int b;
+	__m128 zero=_mm_setzero_ps();
+	//resevred. #pragma omp parallel for
+	for (int w = 0; w < (imageWidth-1)*(imageHeight-1)/4*4; w+=4)
+	{	
+			_mm_storeu_ps(&depth[w], zero);
+	}
+		//tail case:
+	for (b = (imageWidth-1)*(imageHeight-1)/4*4;  b<= (imageWidth-1)*(imageHeight-1); b++)
 	{	
 			depth[b] = 0;
 	}
 
 	
-#pragma omp parallel for
+#pragma omp parallel for collapse(2)
 	for(int y=featureHeight; y<=imageHeight-featureHeight-1;y++)
 		{
 			for(int x=featureWidth; x<=imageWidth-featureWidth-1; x++)
