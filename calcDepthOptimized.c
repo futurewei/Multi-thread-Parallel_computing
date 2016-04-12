@@ -83,34 +83,18 @@ void calcDepthOptimized(float *depth, float *left, float *right, int imageWidth,
 							__m128 sqrtdiff=_mm_mul_ps(difference, difference);
 							total=_mm_add_ps(total, sqrtdiff);
 						}
-					}
-
-						_mm_storeu_ps(squaredDiffer, total);   //add
-						squaredDifference+=squaredDiffer[0]+squaredDiffer[1]+squaredDiffer[2]+squaredDiffer[3];
 						//without adding the extra, if already too large
 						if (squaredDifference>minimumSquaredDifference && minimumSquaredDifference != -1) 
 						{
 							continue;
 						}
-
-						int leftY;
-						int rightY;
-						int k;
+						//tail case
 						if(featureWidth%2==0)
 						{
-							for(k=-featureHeight; k<=featureHeight; k++)
-							{
-								leftY=y+k;
-								rightY=y+dy+k;
 								float differ = left[ leftY* imageWidth + x+featureWidth] - right[ rightY* imageWidth + x+dx+featureWidth];
 								squaredDifference += differ * differ;
-							}
 						}
 						else{
-							for(k=-featureHeight; k<=featureHeight; k++)
-						{
-							leftY=y+k;
-							rightY=y+dy+k;
 							int leftpos=leftY*imageWidth + x+ featureWidth;
 							int rightpos=rightY *imageWidth+ x+dx+featureWidth;
 							float differ_1 = left[leftpos] - right[rightpos];
@@ -118,8 +102,9 @@ void calcDepthOptimized(float *depth, float *left, float *right, int imageWidth,
 							float differ_3 = left[leftpos-2] - right[rightpos-2];
 							squaredDifference += differ_1 * differ_1  + differ_2 * differ_2 +differ_3 * differ_3;
 						}
-						}
-
+					}
+						_mm_storeu_ps(squaredDiffer, total);   //add
+						squaredDifference+=squaredDiffer[0]+squaredDiffer[1]+squaredDiffer[2]+squaredDiffer[3];
 					/* 
 					Check if you need to update minimum square difference. 
 					This is when either it has not been set yet, the current
