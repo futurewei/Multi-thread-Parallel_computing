@@ -27,16 +27,20 @@ void calcDepthOptimized(float *depth, float *left, float *right, int imageWidth,
 	/* The two outer for loops iterate through each pixel */
 	//depth array size= imageheight * imagewidth
 	#pragma omp parallel for
-	for (int y = 0; y < imageHeight; y++)
+	for (int h = 0; h < imageHeight; h++)
 	{
-		for (int x = 0; x < imageWidth; x++)
+		for (int w = 0; w < imageWidth; w++)
 		{	
-			/* Set the depth to 0 if looking at edge of the image where a feature box cannot fit. */
-			if ((y < featureHeight) || (y >= imageHeight - featureHeight) || (x < featureWidth) || (x >= imageWidth - featureWidth))
-			{
-				depth[y * imageWidth + x] = 0;
-				continue;
-			}
+				depth[h * imageWidth + w] = 0;
+
+		}
+	}
+	
+#pragma omp parallel for
+	for(int y=featureHeight; y<=imageHeight-featureHeight-1;y++)
+		{
+			for(int x=featureWidth; x<=imageHeight-featureWidth-1; x++)
+		   {
 
 			float minimumSquaredDifference = -1;
 			int minimumDy = 0;
@@ -78,7 +82,7 @@ void calcDepthOptimized(float *depth, float *left, float *right, int imageWidth,
 						}
 					}
 
-						_mm_storeu_ps(squaredDiffer, total);
+						_mm_storeu_ps(squaredDiffer, total);   //add
 						squaredDifference+=squaredDiffer[0]+squaredDiffer[1]+squaredDiffer[2]+squaredDiffer[3];
 						//without adding the extra, if already too large
 						if (squaredDifference>minimumSquaredDifference && minimumSquaredDifference != -1) 
@@ -133,22 +137,11 @@ void calcDepthOptimized(float *depth, float *left, float *right, int imageWidth,
 			Set the value in the depth map. 
 			If max displacement is equal to 0, the depth value is just 0.
 			*/
-			if (minimumSquaredDifference != -1)
+			if (maximumDisplacement!=0)
 			{
-				if (maximumDisplacement == 0)
-				{
-					depth[y * imageWidth + x] = 0;
-				}
-				else
-				{
 					depth[y * imageWidth + x] = displacementNaive(minimumDx, minimumDy);
-				}
 			}
-			else
-			{
-				depth[y * imageWidth + x] = 0;
 			}
-  		}
+		}
 	}
-}
 
