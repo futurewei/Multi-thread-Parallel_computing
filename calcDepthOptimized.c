@@ -52,8 +52,7 @@ void calcDepthOptimized(float *depth, float *left, float *right, int imageWidth,
 		padding=(2*featureWidth+1)-4;
 	}
 	float temp[4]={1,1,1,0};
-	__m128 tempp;
-	_mm_storeu_ps(tempp,temp);
+	__m128 tempp=_mm_loadu_ps(&temp[0]);
 
 #pragma omp parallel for collapse(2)
 	for(int y=featureHeight; y<=imageHeight-featureHeight-1;y++)
