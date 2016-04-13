@@ -85,11 +85,15 @@ void calcDepthOptimized(float *depth, float *left, float *right, int imageWidth,
 						padding=(2*featureWidth+1)-4;
 					}
 
-					
+					int k=0;
 					for (int boxX = -featureWidth, i=0; i <= padding; boxX+=4, i+=4) 
 					{
 							int leftX = x + boxX; 
 							int rightX = x + dx + boxX;
+							if(even=0; i==padding)
+							{
+								k=1;
+							}
 						for (int boxY = -featureHeight; boxY <= featureHeight; boxY++)   //*************************************************
 						{
 							
@@ -97,14 +101,11 @@ void calcDepthOptimized(float *depth, float *left, float *right, int imageWidth,
 							int rightY = y + dy + boxY;
 							left_row=_mm_loadu_ps(&left[leftY * imageWidth + leftX]);
 							right_row=_mm_loadu_ps(&right[rightY * imageWidth + rightX]);
-							if(even==0 && i==padding)
+							if(k==1)
 							{
-								temp[3]=left[leftY * imageWidth + leftX+ 3];
+								temp[3]=left[leftY * imageWidth + leftX+ 3] - right[rightY * imageWidth + rightX+ 3];
 								tempp=_mm_loadu_ps(&temp[0]);
 								left_row=_mm_sub_ps(left_row, tempp);
-								temp[3]=right[rightY * imageWidth + rightX+ 3];
-								tempp=_mm_loadu_ps(&temp[0]);
-								right_row=_mm_sub_ps(right_row, tempp);
 							}
 							difference = _mm_sub_ps(left_row, right_row);
 							difference=_mm_mul_ps(difference, difference);
