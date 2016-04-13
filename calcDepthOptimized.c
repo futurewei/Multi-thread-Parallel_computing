@@ -46,7 +46,6 @@ if(featureWidth%2==0)
 	even=1;
 }
 	
-float squaredDiffer[4];
 __m128 left_row;
 __m128 right_row;
 __m128 difference;
@@ -76,6 +75,7 @@ __m128 difference;
 
 					__m128 total = _mm_setzero_ps();
 					float squaredDifference = 0;
+					float squaredDiffer[4];
 
 					/* Sum the squared difference within a box of +/- featureHeight and +/- featureWidth. */
 					for (int boxX = -featureWidth, i=0; i <= (2*featureWidth+1)-4; boxX+=4, i+=4) 
