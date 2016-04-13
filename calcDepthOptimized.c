@@ -40,6 +40,11 @@ void calcDepthOptimized(float *depth, float *left, float *right, int imageWidth,
 			depth[b] = 0;
 	}
 
+int even=0;
+if(featureWidth%2==0)
+{
+	even=1;
+}
 	
 #pragma omp parallel for collapse(2)
 	for(int y=featureHeight; y<=imageHeight-featureHeight-1;y++)
@@ -89,7 +94,7 @@ void calcDepthOptimized(float *depth, float *left, float *right, int imageWidth,
 						}
 					}
 
-						_mm_storeu_ps(squaredDiffer, total);   //add
+						_mm_storeu_ps(squaredDiffer, total);   //save
 						squaredDifference+=squaredDiffer[0]+squaredDiffer[1]+squaredDiffer[2]+squaredDiffer[3];
 						//without adding the extra, if already too large
 						if (squaredDifference>minimumSquaredDifference && minimumSquaredDifference != -1) 
@@ -100,7 +105,7 @@ void calcDepthOptimized(float *depth, float *left, float *right, int imageWidth,
 						int leftY;
 						int rightY;
 						int k;
-						if(featureWidth%2==0)
+						if(even)
 						{
 							for(k=-featureHeight; k<=featureHeight; k++)
 							{
