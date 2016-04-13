@@ -72,12 +72,13 @@ void calcDepthOptimized(float *depth, float *left, float *right, int imageWidth,
 					__m128 right_row;
 					__m128 difference;
 					/* Sum the squared difference within a box of +/- featureHeight and +/- featureWidth. */
+
 					int padding=(2*featureWidth+1)-4;
 					if(featureWidth%2==0)
 					{
 						padding=(2*featureWidth+1+1)-4;
 					}
-					for (int boxX = -featureWidth, i=1; i <= padding; boxX+=4, i+=4) 
+					for (int boxX = -featureWidth, i=0; i <= padding; boxX+=4, i+=4) 
 					{
 							int leftX = x + boxX; 
 							int rightX = x + dx + boxX;
