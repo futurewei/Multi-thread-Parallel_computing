@@ -90,7 +90,7 @@ void calcDepthOptimized(float *depth, float *left, float *right, int imageWidth,
 					{
 							int leftX = x + boxX; 
 							int rightX = x + dx + boxX;
-							if(even=0 && i==padding)
+							if(even==0 && i==padding)
 							{
 								nn=1;
 							}
