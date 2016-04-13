@@ -52,6 +52,8 @@ void calcDepthOptimized(float *depth, float *left, float *right, int imageWidth,
 		padding=(2*featureWidth+1)-4;
 	}
 	float temp[4]={1,1,1,0};
+	__m128 tempp;
+	_mm_storeu_ps(tempp,temp);
 
 #pragma omp parallel for collapse(2)
 	for(int y=featureHeight; y<=imageHeight-featureHeight-1;y++)
@@ -79,7 +81,6 @@ void calcDepthOptimized(float *depth, float *left, float *right, int imageWidth,
 					float squaredDifference = 0;
 					
 					float squaredDiffer[4];
-					__m128 tempp;
 					__m128 total = _mm_setzero_ps();
 					__m128 left_row;
 					__m128 right_row;
@@ -103,8 +104,8 @@ void calcDepthOptimized(float *depth, float *left, float *right, int imageWidth,
 							right_row=_mm_loadu_ps(&right[rightY * imageWidth + rightX]);
 							if(nn==1)
 							{
-								left_row=_mm_and_ps(left_row, &temp[0]);
-								right_row=_mm_and_ps(right_row, &temp[0]);
+								left_row=_mm_and_ps(left_row, tempp);
+								right_row=_mm_and_ps(right_row, tempp);
 							}
 
 							difference = _mm_sub_ps(left_row, right_row);
