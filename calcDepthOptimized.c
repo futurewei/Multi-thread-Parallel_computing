@@ -40,20 +40,7 @@ void calcDepthOptimized(float *depth, float *left, float *right, int imageWidth,
 			depth[b] = 0;
 	}
 
-	int even=0;
-	if(featureHeight%2==0)
-	{				
-		even=1;
-	}
-
-	int padding=(2*featureWidth+1+1)-4;
-	if(even)
-	{
-		padding=(2*featureWidth+1)-4;
-	}
-	float temp[4]={1,1,1,0};
-	__m128 tempp=_mm_loadu_ps(&temp[0]);
-
+	
 #pragma omp parallel for collapse(2)
 	for(int y=featureHeight; y<=imageHeight-featureHeight-1;y++)
 		{
@@ -85,15 +72,10 @@ void calcDepthOptimized(float *depth, float *left, float *right, int imageWidth,
 					__m128 right_row;
 					__m128 difference;
 					/* Sum the squared difference within a box of +/- featureHeight and +/- featureWidth. */
-					int nn=0;
-					for (int boxX = -featureWidth, i=0; i <= padding; boxX+=4, i+=4) 
+					for (int boxX = -featureWidth, i=0; i <= (2*featureWidth+1)-4; boxX+=4, i+=4) 
 					{
 							int leftX = x + boxX; 
 							int rightX = x + dx + boxX;
-							if(even==0 && i==padding)
-							{
-								nn=1;
-							}
 						for (int boxY = -featureHeight; boxY <= featureHeight; boxY++)   //*************************************************
 						{
 							
@@ -101,19 +83,13 @@ void calcDepthOptimized(float *depth, float *left, float *right, int imageWidth,
 							int rightY = y + dy + boxY;
 							left_row=_mm_loadu_ps(&left[leftY * imageWidth + leftX]);
 							right_row=_mm_loadu_ps(&right[rightY * imageWidth + rightX]);
-							if(nn==1)
-							{
-								left_row=_mm_and_ps(left_row, tempp);
-								right_row=_mm_and_ps(right_row, tempp);
-							}
-
 							difference = _mm_sub_ps(left_row, right_row);
 							difference=_mm_mul_ps(difference, difference);
 							total=_mm_add_ps(total, difference);
 						}
 					}
 
-						_mm_storeu_ps(squaredDiffer, total);   //save to array.
+						_mm_storeu_ps(squaredDiffer, total);   //add
 						squaredDifference+=squaredDiffer[0]+squaredDiffer[1]+squaredDiffer[2]+squaredDiffer[3];
 						//without adding the extra, if already too large
 						if (squaredDifference>minimumSquaredDifference && minimumSquaredDifference != -1) 
@@ -124,7 +100,7 @@ void calcDepthOptimized(float *depth, float *left, float *right, int imageWidth,
 						int leftY;
 						int rightY;
 						int k;
-						if(even==1)
+						if(featureWidth%2==0)
 						{
 							for(k=-featureHeight; k<=featureHeight; k++)
 							{
@@ -134,7 +110,19 @@ void calcDepthOptimized(float *depth, float *left, float *right, int imageWidth,
 								squaredDifference += differ * differ;
 							}
 						}
-						//no need to odd special case.
+						else{
+							for(k=-featureHeight; k<=featureHeight; k++)
+						{
+							leftY=y+k;
+							rightY=y+dy+k;
+							int leftpos=leftY*imageWidth + x+ featureWidth;
+							int rightpos=rightY *imageWidth+ x+dx+featureWidth;
+							float differ_1 = left[leftpos] - right[rightpos];
+							float differ_2 = left[leftpos-1] - right[ rightpos-1];
+							float differ_3 = left[leftpos-2] - right[rightpos-2];
+							squaredDifference += differ_1 * differ_1  + differ_2 * differ_2 +differ_3 * differ_3;
+						}
+						}
 
 					/* 
 					Check if you need to update minimum square difference. 
