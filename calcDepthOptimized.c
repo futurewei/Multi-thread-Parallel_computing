@@ -66,7 +66,7 @@ void calcDepthOptimized(float *depth, float *left, float *right, int imageWidth,
 
 					float squaredDifference = 0;
 					
-					float squaredDiffer[4]={0.0,0.0,0.0,0.0};
+					float squaredDiffer[4];
 					__m128 total = _mm_setzero_ps();
 					__m128 left_row;
 					__m128 right_row;
