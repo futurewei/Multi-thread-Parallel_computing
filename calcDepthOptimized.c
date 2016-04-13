@@ -46,9 +46,6 @@ if(featureWidth%2==0)
 	even=1;
 }
 	
-__m128 left_row;
-__m128 right_row;
-__m128 difference;
 
 #pragma omp parallel for collapse(2)
 	for(int y=featureHeight; y<=imageHeight-featureHeight-1;y++)
@@ -76,7 +73,9 @@ __m128 difference;
 					__m128 total = _mm_setzero_ps();
 					float squaredDifference = 0;
 					float squaredDiffer[4];
-
+					__m128 left_row;
+					__m128 right_row;
+					__m128 difference;
 					/* Sum the squared difference within a box of +/- featureHeight and +/- featureWidth. */
 					for (int boxX = -featureWidth, i=0; i <= (2*featureWidth+1)-4; boxX+=4, i+=4) 
 					{
