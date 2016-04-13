@@ -40,7 +40,12 @@ void calcDepthOptimized(float *depth, float *left, float *right, int imageWidth,
 			depth[b] = 0;
 	}
 
-	
+	int even=0;
+	if(featureHeight%2==0)
+	{				
+		even=1;
+	}
+
 #pragma omp parallel for collapse(2)
 	for(int y=featureHeight; y<=imageHeight-featureHeight-1;y++)
 		{
@@ -67,14 +72,15 @@ void calcDepthOptimized(float *depth, float *left, float *right, int imageWidth,
 					float squaredDifference = 0;
 					
 					float squaredDiffer[4];
+					float temp[4]={0,0,0,0};
+					__m128 tempp;
 					__m128 total = _mm_setzero_ps();
 					__m128 left_row;
 					__m128 right_row;
 					__m128 difference;
 					/* Sum the squared difference within a box of +/- featureHeight and +/- featureWidth. */
-
 					int padding=(2*featureWidth+1)-4;
-					if(featureWidth%2==0)
+					if(even)
 					{
 						padding=(2*featureWidth+1+1)-4;
 					}
@@ -89,6 +95,15 @@ void calcDepthOptimized(float *depth, float *left, float *right, int imageWidth,
 							int rightY = y + dy + boxY;
 							left_row=_mm_loadu_ps(&left[leftY * imageWidth + leftX]);
 							right_row=_mm_loadu_ps(&right[rightY * imageWidth + rightX]);
+							if(even==0 && i==padding-4)
+							{
+								temp[3]=left[leftY * imageWidth + leftx+ 3];
+								tempp=_mm_loadu_ps(&temp[0]);
+								left_row=_mm_sub_ps(left_row, tempp);
+								temp[3]=right[rightY * imageWidth + rightX+ 3];
+								tempp=_mm_loadu_ps(&temp[0]);
+								right_row=_mm_sub_ps(right_row, tempp);
+							}
 							difference = _mm_sub_ps(left_row, right_row);
 							difference=_mm_mul_ps(difference, difference);
 							total=_mm_add_ps(total, difference);
@@ -106,7 +121,7 @@ void calcDepthOptimized(float *depth, float *left, float *right, int imageWidth,
 						int leftY;
 						int rightY;
 						int k;
-						if(featureWidth%2==0)
+						if(even==1)
 						{
 							for(k=-featureHeight; k<=featureHeight; k++)
 							{
