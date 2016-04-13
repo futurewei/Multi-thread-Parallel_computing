@@ -72,7 +72,12 @@ void calcDepthOptimized(float *depth, float *left, float *right, int imageWidth,
 					__m128 right_row;
 					__m128 difference;
 					/* Sum the squared difference within a box of +/- featureHeight and +/- featureWidth. */
-					for (int boxX = -featureWidth, i=1; i <= (2*featureWidth+1)-4; boxX+=4, i+=4) 
+					int padding=(2*featureWidth+1)-4;
+					if(featureWidth%2==0)
+					{
+						padding=(2*featureWidth+1+1)-4;
+					}
+					for (int boxX = -featureWidth, i=1; i <= padding; boxX+=4, i+=4) 
 					{
 							int leftX = x + boxX; 
 							int rightX = x + dx + boxX;
@@ -89,7 +94,7 @@ void calcDepthOptimized(float *depth, float *left, float *right, int imageWidth,
 						}
 					}
 
-						_mm_storeu_ps(squaredDiffer, total);   //add
+						_mm_storeu_ps(squaredDiffer, total);   //save to array.
 						squaredDifference+=squaredDiffer[0]+squaredDiffer[1]+squaredDiffer[2]+squaredDiffer[3];
 						//without adding the extra, if already too large
 						if (squaredDifference>minimumSquaredDifference && minimumSquaredDifference != -1) 
@@ -110,19 +115,7 @@ void calcDepthOptimized(float *depth, float *left, float *right, int imageWidth,
 								squaredDifference += differ * differ;
 							}
 						}
-						else{
-							for(k=-featureHeight; k<=featureHeight; k++)
-						{
-							leftY=y+k;
-							rightY=y+dy+k;
-							int leftpos=leftY*imageWidth + x+ featureWidth;
-							int rightpos=rightY *imageWidth+ x+dx+featureWidth;
-							float differ_1 = left[leftpos] - right[rightpos];
-							float differ_2 = left[leftpos-1] - right[ rightpos-1];
-							float differ_3 = left[leftpos-2] - right[rightpos-2];
-							squaredDifference += differ_1 * differ_1  + differ_2 * differ_2 +differ_3 * differ_3;
-						}
-						}
+						//no need to odd special case.
 
 					/* 
 					Check if you need to update minimum square difference. 
