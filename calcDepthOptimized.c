@@ -86,6 +86,7 @@ if(featureWidth%2==0)
 							
 							int leftY = y + boxY;
 							int rightY = y + dy + boxY;
+
 							left_row=_mm_loadu_ps(&left[leftY * imageWidth + leftX]);
 							right_row=_mm_loadu_ps(&right[rightY * imageWidth + rightX]);
 							difference = _mm_sub_ps(left_row, right_row);
@@ -96,12 +97,6 @@ if(featureWidth%2==0)
 
 						_mm_storeu_ps(squaredDiffer, total);   //save
 						squaredDifference+=squaredDiffer[0]+squaredDiffer[1]+squaredDiffer[2]+squaredDiffer[3];
-						//without adding the extra, if already too large
-						if (squaredDifference>minimumSquaredDifference && minimumSquaredDifference != -1) 
-						{
-							continue;
-						}
-
 						int leftY;
 						int rightY;
 						int k;
