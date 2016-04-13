@@ -82,7 +82,7 @@ void calcDepthOptimized(float *depth, float *left, float *right, int imageWidth,
 					int padding=(2*featureWidth+1+1)-4;
 					if(even)
 					{
-						padding=(2*featureWidth+1+1)-4;
+						padding=(2*featureWidth+1)-4;
 					}
 
 					
