@@ -97,7 +97,7 @@ void calcDepthOptimized(float *depth, float *left, float *right, int imageWidth,
 							right_row=_mm_loadu_ps(&right[rightY * imageWidth + rightX]);
 							if(even==0 && i==padding-4)
 							{
-								temp[3]=left[leftY * imageWidth + leftx+ 3];
+								temp[3]=left[leftY * imageWidth + leftX+ 3];
 								tempp=_mm_loadu_ps(&temp[0]);
 								left_row=_mm_sub_ps(left_row, tempp);
 								temp[3]=right[rightY * imageWidth + rightX+ 3];
