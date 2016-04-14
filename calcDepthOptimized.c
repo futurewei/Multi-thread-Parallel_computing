@@ -65,6 +65,7 @@ if(featureWidth%2==0)
 				for (int dx = -maximumDisplacement; dx <= maximumDisplacement; dx++)
 				{
 					/* Skip feature boxes that dont fit in the displacement box. */
+					//this part should be reduced in some way
 					if (y + dy - featureHeight < 0 || y + dy + featureHeight >= imageHeight || x + dx - featureWidth < 0 || x + dx + featureWidth >= imageWidth)
 					{
 						continue;
@@ -106,6 +107,7 @@ if(featureWidth%2==0)
 						int leftY;
 						int rightY;
 						int k;
+						//tail case:
 						if(even)
 						{
 							for(k=-featureHeight; k<=featureHeight; k++)
