@@ -96,7 +96,7 @@ if(featureWidth%2==0)
 						}
 					}
 
-						_mm_storeu_ps(squaredDiffer, total);   //save
+						_mm_storeu_ps(squaredDiffer, total);    //save
 						squaredDifference+=squaredDiffer[0]+squaredDiffer[1]+squaredDiffer[2]+squaredDiffer[3];
 						//without adding the extra, if already too large
 						if (squaredDifference>minimumSquaredDifference && minimumSquaredDifference != -1) 
